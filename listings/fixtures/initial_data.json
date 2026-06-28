@@ -1,0 +1,199 @@
+[
+  {
+    "model": "listings.region",
+    "pk": 1,
+    "fields": {
+      "name_uz": "Toshkent",
+      "name_ru": "Ташкент",
+      "code": "TAS"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 2,
+    "fields": {
+      "name_uz": "Samarqand",
+      "name_ru": "Самарканд",
+      "code": "SAM"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 3,
+    "fields": {
+      "name_uz": "Farg'ona",
+      "name_ru": "Фергана",
+      "code": "FER"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 4,
+    "fields": {
+      "name_uz": "Andijon",
+      "name_ru": "Андижан",
+      "code": "AND"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 5,
+    "fields": {
+      "name_uz": "Namangan",
+      "name_ru": "Наманган",
+      "code": "NAM"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 6,
+    "fields": {
+      "name_uz": "Buxoro",
+      "name_ru": "Бухара",
+      "code": "BUX"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 7,
+    "fields": {
+      "name_uz": "Qashqadaryo",
+      "name_ru": "Кашкадарья",
+      "code": "QAS"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 8,
+    "fields": {
+      "name_uz": "Surxondaryo",
+      "name_ru": "Сурхандарья",
+      "code": "SUR"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 9,
+    "fields": {
+      "name_uz": "Jizzax",
+      "name_ru": "Джизак",
+      "code": "JIZ"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 10,
+    "fields": {
+      "name_uz": "Sirdaryo",
+      "name_ru": "Сырдарья",
+      "code": "SIR"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 11,
+    "fields": {
+      "name_uz": "Navoiy",
+      "name_ru": "Навои",
+      "code": "NAV"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 12,
+    "fields": {
+      "name_uz": "Xorazm",
+      "name_ru": "Хорезм",
+      "code": "XOR"
+    }
+  },
+  {
+    "model": "listings.region",
+    "pk": 13,
+    "fields": {
+      "name_uz": "Qoraqalpog'iston",
+      "name_ru": "Кarakalpakstan",
+      "code": "QRP"
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 1,
+    "fields": {
+      "name_uz": "Oziq-ovqat",
+      "name_ru": "Продукты питания",
+      "slug": "food",
+      "parent": null
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 2,
+    "fields": {
+      "name_uz": "Mevalar",
+      "name_ru": "Фрукты",
+      "slug": "fruits",
+      "parent": 1
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 3,
+    "fields": {
+      "name_uz": "Sabzavotlar",
+      "name_ru": "Овощи",
+      "slug": "vegetables",
+      "parent": 1
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 4,
+    "fields": {
+      "name_uz": "Non mahsulotlari",
+      "name_ru": "Хлебобулочные",
+      "slug": "bakery",
+      "parent": null
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 5,
+    "fields": {
+      "name_uz": "Uy-ro'zg'or buyumlari",
+      "name_ru": "Товары для дома",
+      "slug": "household",
+      "parent": null
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 6,
+    "fields": {
+      "name_uz": "Mebel",
+      "name_ru": "Мебель",
+      "slug": "furniture",
+      "parent": 5
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 7,
+    "fields": {
+      "name_uz": "Hunarmandchilik",
+      "name_ru": "Ремесленные изделия",
+      "slug": "handmade",
+      "parent": null
+    }
+  },
+  {
+    "model": "listings.category",
+    "pk": 8,
+    "fields": {
+      "name_uz": "Optom mahsulotlar",
+      "name_ru": "Оптовые товары",
+      "slug": "wholesale",
+      "parent": null
+    }
+  }
+]

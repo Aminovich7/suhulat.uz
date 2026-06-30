@@ -48,12 +48,19 @@ class SellerProfileAdmin(admin.ModelAdmin):
     list_display = ("seller_name", "user", "seller_type", "region", "is_verified", "rating")
     list_filter = ("seller_type", "is_verified", "region")
     search_fields = ("seller_name", "user__phone", "user__full_name")
-    actions = ["approve_sellers", "revoke_verification"]
+    actions = ["approve_sellers", "reject_sellers", "revoke_verification"]
 
     @admin.action(description="Approve selected sellers")
     def approve_sellers(self, request, queryset):
         updated = queryset.update(is_verified=True)
         self.message_user(request, f"{updated} seller(s) approved.", messages.SUCCESS)
+
+    @admin.action(description="Reject selected sellers (unverify + deactivate account)")
+    def reject_sellers(self, request, queryset):
+        user_ids = list(queryset.values_list("user_id", flat=True))
+        updated = queryset.update(is_verified=False)
+        User.objects.filter(id__in=user_ids).update(is_active=False)
+        self.message_user(request, f"{updated} seller(s) rejected.", messages.WARNING)
 
     @admin.action(description="Revoke verification")
     def revoke_verification(self, request, queryset):

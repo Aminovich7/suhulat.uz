@@ -150,7 +150,13 @@ class RFQActionSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError("No offer to accept.")
 
-        listing = rfq.listing
+        listing = Listing.objects.select_for_update().get(pk=rfq.listing_id)
+        if listing.status != Listing.Status.ACTIVE:
+            raise serializers.ValidationError({"listing": "Listing is no longer available."})
+        if quantity > listing.quantity_available:
+            raise serializers.ValidationError(
+                {"quantity": "Requested quantity exceeds available stock."}
+            )
         total_price = (price * quantity).quantize(Decimal("0.01"))
 
         order = Order.objects.create(

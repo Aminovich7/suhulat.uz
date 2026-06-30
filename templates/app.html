@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suhulat — O'zbekiston bozori</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo" data-link>
+        <span class="logo-mark">S</span>
+        <span class="logo-text">Suhulat</span>
+      </a>
+
+      <form class="header-search" id="header-search-form">
+        <input type="search" id="header-search-input" placeholder="Mahsulot qidirish..." aria-label="Qidiruv">
+        <button type="submit" class="btn btn-primary btn-sm">Qidirish</button>
+      </form>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Menyu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="main-nav" id="main-nav">
+        <a href="/" data-link>Bosh sahifa</a>
+        <a href="/my-listings" data-link data-auth="seller" class="nav-auth">E'lonlarim</a>
+        <a href="/listings/create" data-link data-auth="seller" class="nav-auth">E'lon qo'shish</a>
+        <a href="/rfq" data-link data-auth class="nav-auth">RFQ</a>
+        <a href="/orders" data-link data-auth class="nav-auth">Buyurtmalar</a>
+        <a href="/wishlist" data-link data-auth="buyer" class="nav-auth">Sevimlilar</a>
+        <a href="/cart" data-link data-auth="buyer" class="nav-auth nav-cart">
+          Savat <span class="badge" id="cart-badge" hidden>0</span>
+        </a>
+        <a href="/profile" data-link data-auth class="nav-auth">Profil</a>
+        <a href="/admin" data-link data-auth="staff" class="nav-auth">Admin</a>
+        <a href="/settings" data-link data-auth class="nav-auth">Sozlamalar</a>
+        <a href="/login" data-link data-guest class="nav-guest">Kirish</a>
+        <a href="/register/buyer" data-link data-guest class="nav-guest btn btn-outline btn-sm">Ro'yxatdan o'tish</a>
+        <button type="button" id="logout-btn" data-auth class="btn btn-ghost btn-sm nav-auth" hidden>Chiqish</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="app-main">
+    <div class="container">
+      <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <p>Yuklanmoqda...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Suhulat</strong>
+        <p>O'zbekiston uchun ortiqcha mahsulot, ishlab chiqaruvchi va ulgurji bozor.</p>
+      </div>
+      <div class="footer-links">
+        <a href="/api/docs/" target="_blank" rel="noopener">API hujjatlari</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Suhulat. Mahalliy ishlab chiqish.</p>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/utils.js' %}"></script>
+  <script src="{% static 'js/api.js' %}"></script>
+  <script src="{% static 'js/auth.js' %}"></script>
+  <script src="{% static 'js/components.js' %}"></script>
+  <script src="{% static 'js/pages/home.js' %}"></script>
+  <script src="{% static 'js/pages/auth.js' %}"></script>
+  <script src="{% static 'js/pages/listings.js' %}"></script>
+  <script src="{% static 'js/pages/cart.js' %}"></script>
+  <script src="{% static 'js/pages/wishlist.js' %}"></script>
+  <script src="{% static 'js/pages/orders.js' %}"></script>
+  <script src="{% static 'js/pages/rfq.js' %}"></script>
+  <script src="{% static 'js/pages/profile.js' %}"></script>
+  <script src="{% static 'js/pages/admin.js' %}"></script>
+  <script src="{% static 'js/router.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

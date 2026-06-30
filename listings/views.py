@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from common.permissions import IsOwner, IsVerifiedSeller
+from common.permissions import IsOwner, IsSeller
 from listings.filters import ListingFilter
 from listings.models import Category, Listing, ListingImage, Region
 from listings.serializers import (
@@ -22,7 +22,7 @@ from listings.serializers import (
 @extend_schema_view(
     list=extend_schema(description="Public listing catalog with filters."),
     retrieve=extend_schema(description="Public listing detail."),
-    create=extend_schema(description="Create listing (verified seller)."),
+    create=extend_schema(description="Create listing (seller; active requires verification)."),
     partial_update=extend_schema(description="Update own listing."),
     destroy=extend_schema(description="Soft-delete own listing."),
 )
@@ -38,6 +38,7 @@ class ListingViewSet(
     search_fields = ["title", "description"]
     ordering_fields = ["created_at", "price"]
     ordering = ["-created_at"]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
         Listing.objects.apply_expiry()
@@ -60,7 +61,7 @@ class ListingViewSet(
         return qs.exclude(status=Listing.Status.DELETED).filter(seller=self.request.user)
 
     def get_serializer_class(self):
-        if self.action in ("create", "partial_update", "update"):
+        if self.action in ("create", "partial_update"):
             return ListingWriteSerializer
         if self.action == "retrieve":
             return ListingDetailSerializer
@@ -70,7 +71,7 @@ class ListingViewSet(
         if self.action in ("list", "retrieve"):
             return [AllowAny()]
         if self.action == "create":
-            return [IsVerifiedSeller()]
+            return [IsAuthenticated(), IsSeller()]
         return [IsAuthenticated(), IsOwner()]
 
     def perform_destroy(self, instance):
@@ -81,7 +82,7 @@ class ListingViewSet(
         detail=True,
         methods=["post"],
         url_path="images",
-        permission_classes=[IsAuthenticated, IsOwner, IsVerifiedSeller],
+        permission_classes=[IsAuthenticated, IsOwner, IsSeller],
     )
     def upload_image(self, request, pk=None):
         listing = self.get_object()

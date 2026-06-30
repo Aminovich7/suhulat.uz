@@ -1,9 +1,5 @@
-from decimal import Decimal
-
-from django.db.models import Avg
 from rest_framework import serializers
 
-from accounts.models import SellerProfile
 from orders.models import Order
 from reviews.models import Review
 
@@ -50,19 +46,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         review = super().create(validated_data)
-        self._update_seller_rating(validated_data["reviewee"])
+        from reviews.services import update_reviewee_rating
+
+        update_reviewee_rating(validated_data["reviewee"])
         return review
-
-    def _update_seller_rating(self, user):
-        profile = getattr(user, "seller_profile", None)
-        if profile is None:
-            return
-        from django.db.models import Count
-
-        stats = Review.objects.filter(reviewee=user).aggregate(
-            avg=Avg("rating"),
-            count=Count("id"),
-        )
-        profile.rating = Decimal(str(round(stats["avg"] or 0, 2)))
-        profile.total_reviews = stats["count"]
-        profile.save(update_fields=["rating", "total_reviews"])

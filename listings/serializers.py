@@ -84,9 +84,12 @@ class ListingDetailSerializer(ListingListSerializer):
 
 
 class ListingWriteSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+
     class Meta:
         model = Listing
         fields = (
+            "id",
             "title",
             "description",
             "category",
@@ -126,10 +129,31 @@ class ListingWriteSerializer(serializers.ModelSerializer):
                     {"status": "Seller must be verified to publish active listings."}
                 )
 
+        is_perishable = attrs.get(
+            "is_perishable",
+            getattr(self.instance, "is_perishable", False),
+        )
+        expires_at = attrs.get(
+            "expires_at",
+            getattr(self.instance, "expires_at", None),
+        )
+        if is_perishable and not expires_at:
+            raise serializers.ValidationError(
+                {"expires_at": "Expiry date is required for perishable listings."}
+            )
+
         return attrs
 
     def create(self, validated_data):
-        validated_data["seller"] = self.context["request"].user
+        user = self.context["request"].user
+        validated_data["seller"] = user
+        if "status" not in validated_data:
+            profile = getattr(user, "seller_profile", None)
+            validated_data["status"] = (
+                Listing.Status.ACTIVE
+                if profile and profile.is_verified
+                else Listing.Status.PAUSED
+            )
         return super().create(validated_data)
 
 

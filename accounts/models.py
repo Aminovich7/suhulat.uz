@@ -86,6 +86,8 @@ class BuyerProfile(models.Model):
     district = models.CharField(max_length=100)
     is_business_buyer = models.BooleanField(default=False)
     company_name = models.CharField(max_length=200, blank=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    total_reviews = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Buyer: {self.user.full_name}"

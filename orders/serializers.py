@@ -7,6 +7,37 @@ from listings.models import Listing
 from orders.models import Order
 
 
+def validate_listing_order(listing, quantity, user, fulfillment_method, delivery_address=""):
+    """Shared validation for order creation against a listing row."""
+    errors = {}
+    if listing.listing_type != Listing.ListingType.FIXED:
+        errors["listing"] = "Orders can only be created for fixed-price listings."
+    elif listing.status != Listing.Status.ACTIVE:
+        errors["listing"] = "Listing is not available."
+    elif listing.seller_id == user.id:
+        errors["listing"] = "Cannot order your own listing."
+    elif listing.price is None:
+        errors["listing"] = "Listing has no price."
+    elif quantity <= 0:
+        errors["quantity"] = "Quantity must be positive."
+    elif quantity > listing.quantity_available:
+        errors["quantity"] = "Requested quantity exceeds available stock."
+    elif listing.minimum_order_quantity and quantity < listing.minimum_order_quantity:
+        errors["quantity"] = f"Minimum order quantity is {listing.minimum_order_quantity}."
+    if fulfillment_method == Order.FulfillmentMethod.DELIVERY:
+        if not (delivery_address or "").strip():
+            errors["delivery_address"] = "Required for delivery orders."
+    if errors:
+        raise serializers.ValidationError(errors)
+
+
+def restore_listing_stock(listing, quantity):
+    listing.quantity_available += quantity
+    if listing.status == Listing.Status.SOLD_OUT and listing.quantity_available > 0:
+        listing.status = Listing.Status.ACTIVE
+    listing.save(update_fields=["quantity_available", "status", "updated_at"])
+
+
 class OrderSerializer(serializers.ModelSerializer):
     listing_title = serializers.CharField(source="listing.title", read_only=True)
 
@@ -53,59 +84,44 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         listing = attrs["listing"]
-        quantity = attrs["quantity"]
-        request = self.context["request"]
-
-        if listing.listing_type != Listing.ListingType.FIXED:
-            raise serializers.ValidationError(
-                {"listing": "Orders can only be created for fixed-price listings."}
-            )
-        if listing.status != Listing.Status.ACTIVE:
-            raise serializers.ValidationError({"listing": "Listing is not available."})
-        if listing.seller_id == request.user.id:
-            raise serializers.ValidationError({"listing": "Cannot order your own listing."})
-        if listing.price is None:
-            raise serializers.ValidationError({"listing": "Listing has no price."})
-        if quantity <= 0:
-            raise serializers.ValidationError({"quantity": "Quantity must be positive."})
-        if quantity > listing.quantity_available:
-            raise serializers.ValidationError(
-                {"quantity": "Requested quantity exceeds available stock."}
-            )
-        if listing.minimum_order_quantity and quantity < listing.minimum_order_quantity:
-            raise serializers.ValidationError(
-                {
-                    "quantity": (
-                        f"Minimum order quantity is {listing.minimum_order_quantity}."
-                    )
-                }
-            )
-        if attrs["fulfillment_method"] == Order.FulfillmentMethod.DELIVERY:
-            if not attrs.get("delivery_address", "").strip():
-                raise serializers.ValidationError(
-                    {"delivery_address": "Required for delivery orders."}
-                )
-
+        validate_listing_order(
+            listing,
+            attrs["quantity"],
+            self.context["request"].user,
+            attrs["fulfillment_method"],
+            attrs.get("delivery_address", ""),
+        )
         attrs["_unit_price"] = listing.price
-        attrs["_total_price"] = (listing.price * quantity).quantize(Decimal("0.01"))
+        attrs["_total_price"] = (listing.price * attrs["quantity"]).quantize(Decimal("0.01"))
         return attrs
 
     @transaction.atomic
     def create(self, validated_data):
-        listing = validated_data["listing"]
+        listing = Listing.objects.select_for_update().get(
+            pk=validated_data["listing"].pk
+        )
+        quantity = validated_data["quantity"]
         request = self.context["request"]
+        validate_listing_order(
+            listing,
+            quantity,
+            request.user,
+            validated_data["fulfillment_method"],
+            validated_data.get("delivery_address", ""),
+        )
+        unit_price = listing.price
         order = Order.objects.create(
             listing=listing,
             buyer=request.user,
             seller=listing.seller,
-            quantity=validated_data["quantity"],
-            unit_price=validated_data["_unit_price"],
-            total_price=validated_data["_total_price"],
+            quantity=quantity,
+            unit_price=unit_price,
+            total_price=(unit_price * quantity).quantize(Decimal("0.01")),
             fulfillment_method=validated_data["fulfillment_method"],
             delivery_address=validated_data.get("delivery_address", ""),
             buyer_note=validated_data.get("buyer_note", ""),
         )
-        listing.quantity_available -= validated_data["quantity"]
+        listing.quantity_available -= quantity
         if listing.quantity_available <= 0:
             listing.quantity_available = Decimal("0")
             listing.status = Listing.Status.SOLD_OUT
@@ -157,6 +173,8 @@ class OrderStatusTransitionSerializer(serializers.Serializer):
         order = self.context["order"]
         action = self.context["action"]
         if action == "cancel":
+            listing = Listing.objects.select_for_update().get(pk=order.listing_id)
+            restore_listing_stock(listing, order.quantity)
             order.status = Order.Status.CANCELLED
         else:
             order.status = self.validated_data["_new_status"]

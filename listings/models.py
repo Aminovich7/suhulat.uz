@@ -93,7 +93,11 @@ class Listing(models.Model):
     )
     is_perishable = models.BooleanField(default=False)
     expires_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PAUSED,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
